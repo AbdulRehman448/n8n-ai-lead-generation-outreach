@@ -1,0 +1,489 @@
+{
+  "name": "AI Lead Generation & Outreach",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "77c75b10-b72d-41ee-9800-9e70c27b5fb7",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1JW5VTNRJ4Vjq_5Ox3bGjhekvEzh2ZJKHq7jxb8jsze8",
+          "mode": "list",
+          "cachedResultName": "AI Lead Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JW5VTNRJ4Vjq_5Ox3bGjhekvEzh2ZJKHq7jxb8jsze8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JW5VTNRJ4Vjq_5Ox3bGjhekvEzh2ZJKHq7jxb8jsze8/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "cd5a7c61-4118-448a-bd17-ed9721c554d1",
+      "name": "Read Leads",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -64,
+        112
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ISD4F8bP6cr5P2bP",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "366e654b-989a-4330-9fd4-d208fd25ad95",
+      "name": "Filter Valid Leads",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        160,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const originalLeads = $('Filter Valid Leads').all();\nconst currentInput = $input.all();\n\nreturn currentInput.map((item, index) => {\n  const matchingLead = originalLeads[index]?.json || {};\n\n  // Yeh line check karegi ki lead object ke andar kon-kon si keys available hain\n  // aur unme se jo bhi key 'compan' se match karegi, uska data nikal legi\n  const companyKey = Object.keys(matchingLead).find(key => \n    key.toLowerCase().includes('compan')\n  );\n  \n  const companyName = companyKey ? matchingLead[companyKey] : '';\n\n  return {\n    json: {\n      name: matchingLead.name || matchingLead.Name || '',\n      company: companyName,\n      email: matchingLead.email || matchingLead.Email || '',\n      generated_message: item.json.text || '',\n      status: 'Pending',\n      sent_at: ''\n    }\n  };\n});"
+      },
+      "id": "f7420b42-4036-411d-92b8-fbc8a0520ace",
+      "name": "Prepare Outreach Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        736,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1JW5VTNRJ4Vjq_5Ox3bGjhekvEzh2ZJKHq7jxb8jsze8",
+          "mode": "list",
+          "cachedResultName": "AI Lead Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JW5VTNRJ4Vjq_5Ox3bGjhekvEzh2ZJKHq7jxb8jsze8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1596702573,
+          "mode": "list",
+          "cachedResultName": "Outreach",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JW5VTNRJ4Vjq_5Ox3bGjhekvEzh2ZJKHq7jxb8jsze8/edit#gid=1596702573"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $json.name }}",
+            "email": "={{ $json.email }}",
+            "company": "={{ $json.company }}",
+            "generated_message": "={{ $json.generated_message }}",
+            "status": "={{ $json.status }}",
+            "sent_at": "={{ $json.sent_at }}"
+          },
+          "matchingColumns": [
+            "generated_message"
+          ],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "company",
+              "displayName": "company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "generated_message",
+              "displayName": "generated_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sent_at",
+              "displayName": "sent_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "bc7650fc-3f47-4c0c-8f7b-568517d722ae",
+      "name": "Save to Outreach Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        960,
+        112
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ISD4F8bP6cr5P2bP",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "=Quick idea for {{ $json.company }}",
+        "emailType": "text",
+        "message": "={{ $json.generated_message }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Abdul Rehman Ali"
+        }
+      },
+      "id": "981b3cc3-3152-4aab-bd27-a961e9743540",
+      "name": "Send Outreach Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1184,
+        112
+      ],
+      "webhookId": "642e3148-4cb9-471f-b013-d35e784047d0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "D88BGBXE4gJfcz9o",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1JW5VTNRJ4Vjq_5Ox3bGjhekvEzh2ZJKHq7jxb8jsze8",
+          "mode": "list",
+          "cachedResultName": "AI Lead Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JW5VTNRJ4Vjq_5Ox3bGjhekvEzh2ZJKHq7jxb8jsze8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1596702573,
+          "mode": "list",
+          "cachedResultName": "Outreach",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JW5VTNRJ4Vjq_5Ox3bGjhekvEzh2ZJKHq7jxb8jsze8/edit#gid=1596702573"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $node[\"Prepare Outreach Data\"].json.name }}",
+            "status": "Sent",
+            "sent_at": "={{ $now.setZone('Asia/Karachi').toFormat('yyyy-MM-dd hh:mm:ss a') }}"
+          },
+          "matchingColumns": [
+            "name"
+          ],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company",
+              "displayName": "company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "generated_message",
+              "displayName": "generated_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sent_at",
+              "displayName": "sent_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "6e441aaa-872f-4f95-9f5f-2789346d5c2d",
+      "name": "Mark as Sent",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1408,
+        112
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ISD4F8bP6cr5P2bP",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        456,
+        336
+      ],
+      "id": "58f55aa6-a7da-46d9-853e-9c5917db6285",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "suSllveZKu0SFV0m",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert cold outreach specialist. Write a short, personalized cold email for the following lead:\n\nName: {{ $json.name }}\nCompany: {{ $json['company '] }}\nRole: {{ $json.role }}\nIndustry: {{ $json.industry }}\nPain Point: {{ $json.pain_point }}\n\nWrite a 3-4 line email that:\n- Starts by addressing their name personally\n- Mentions their specific pain point naturally\n- Offers AI automation as the solution briefly\n- Ends with a soft call to action\n\nReturn only the email body. No subject line. No extra explanation.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        384,
+        112
+      ],
+      "id": "8b8a3371-c54e-4db6-b3e1-c0def33f8d19",
+      "name": "Generate Outreach Message1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Leads": {
+      "main": [
+        [
+          {
+            "node": "Filter Valid Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Valid Leads": {
+      "main": [
+        [
+          {
+            "node": "Generate Outreach Message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Outreach Data": {
+      "main": [
+        [
+          {
+            "node": "Save to Outreach Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Outreach Sheet": {
+      "main": [
+        [
+          {
+            "node": "Send Outreach Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Outreach Email": {
+      "main": [
+        [
+          {
+            "node": "Mark as Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Outreach Message1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark as Sent": {
+      "main": [
+        []
+      ]
+    },
+    "Generate Outreach Message1": {
+      "main": [
+        [
+          {
+            "node": "Prepare Outreach Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "fadeec0f-b424-40af-9b29-7cf97945f028",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "55f1d75fe3275b80789f74068e8ca5517017b2c7002f67c018846c89915420d3"
+  },
+  "id": "FpjqHBWSN39r8TMW",
+  "tags": []
+}
